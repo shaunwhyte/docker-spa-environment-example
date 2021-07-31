@@ -1,0 +1,14 @@
+# Stage 1 - the build process
+FROM node:14.17.4 as build-deps
+WORKDIR /usr
+COPY package.json ./
+RUN yarn
+COPY . ./
+RUN yarn build
+
+# Stage 2 - the production environment
+FROM nginx:1.12-alpine
+COPY --from=build-deps /usr/build /usr/share/nginx/html
+EXPOSE 80
+ENTRYPOINT [ "envsubst < /usr/share/nginx/html/config.js > temp && mv temp /usr/share/nginx/html/config.js" ]
+CMD ["nginx", "-g", "daemon off;"]
