@@ -7,8 +7,9 @@ COPY . ./
 RUN yarn build
 
 # Stage 2 - the production environment
+
 FROM nginx:1.12-alpine
 COPY --from=build-deps /usr/build /usr/share/nginx/html
 EXPOSE 80
-ENTRYPOINT [ "envsubst < /usr/share/nginx/html/config.js > temp && mv temp /usr/share/nginx/html/config.js" ]
-CMD ["nginx", "-g", "daemon off;"]
+
+ENTRYPOINT cd /usr/share/nginx/html/ && envsubst < config.js > temp.js && mv temp.js config.js && nginx -g 'daemon off;'
